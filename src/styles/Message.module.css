@@ -3,6 +3,7 @@
 	padding: 16px 16px 0;
 	border: 1px solid #000000;
 	margin: 4px;
+	cursor: pointer;
 }
 
 .error {

@@ -1,11 +1,11 @@
 import React from 'react';
 import useFirebase from '../useHooks/useFirebase';
 import Message from '../components/Message';
+import useGlobalValues from '../useHooks/useGlobalValues';
 
 export default function HomePage() {
 	const firebase = useFirebase();
-	const [booksList, setBooksList] = React.useState([]);
-	const [error, setError] = React.useState('');
+	const { booksList, update, error } = useGlobalValues();
 
 	const booksListComponents = booksList.map(book => {
 		return <li key={book.id}>{book.name}</li>;
@@ -15,13 +15,12 @@ export default function HomePage() {
 		try {
 			if (!firebase.currentUser.email) throw { code: 'auth-failed', name: 'Firebase Auth' };
 			const books = await firebase.getBooks();
-			setBooksList(books);
-			setError('');
+			update({ booksList: books, error: '' });
 		} catch (e) {
 			if (e.code === 'auth-failed' && e.name === 'Firebase Auth') {
-				setError(`${e.name} (${e.code}): You need to login for getting the book list.`);
+				update({ error: `${e.name} (${e.code}): You need to login for getting the book list.` });
 			} else {
-				setError(e.toString());
+				update({ error: e.toString() });
 			}
 		}
 	}
