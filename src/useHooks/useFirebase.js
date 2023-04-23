@@ -53,5 +53,21 @@ export default function useFirebase() {
 			}
 			return booksList;
 		},
+		async addBook(booksInfo) {
+			const bookSnapshot = await db.collection('books').add(booksInfo);
+			return {
+				...booksInfo,
+				id: bookSnapshot.id,
+			};
+		},
+		async removeBook(bookId) {
+			await db.collection('books').doc(bookId).delete();
+			return {};
+		},
+		async getBookById(bookId) {
+			const bookSnapshot = await db.collection('books').doc(bookId).get();
+
+			return {};
+		},
 	};
 }
