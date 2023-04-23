@@ -5,13 +5,20 @@ import useGlobalValues from '../useHooks/useGlobalValues';
 
 export default function HomePage() {
 	const firebase = useFirebase();
-	const { booksList, update, error } = useGlobalValues();
+	const { booksList, update, error, booksListLoadTime } = useGlobalValues();
+
+	React.useEffect(function () {
+		if (!firebase.currentUser.email) return;
+		if (Date.now() - booksListLoadTime < 1000 * 60 * 30) return;
+		pullBooksFromDb();
+	});
 
 	const booksListComponents = booksList.map(book => {
 		return <li key={book.id}>{book.name}</li>;
 	});
 
 	async function pullBooksFromDb() {
+		update({ booksListLoadTime: Date.now() });
 		try {
 			if (!firebase.currentUser.email) throw { code: 'auth-failed', name: 'Firebase Auth' };
 			const books = await firebase.getBooks();
@@ -28,8 +35,14 @@ export default function HomePage() {
 	return (
 		<>
 			<h1>My Name: {firebase.currentUser.displayName || '--'}</h1>
-			<button onClick={pullBooksFromDb}>Get Books</button>
-			<ul>{booksListComponents}</ul>
+			{firebase.currentUser.email ? (
+				<>
+					<button onClick={pullBooksFromDb}>Refresh Books</button>
+					<ul>{booksListComponents}</ul>
+				</>
+			) : (
+				<></>
+			)}
 			{error ? (
 				<>
 					<Message type='error'>{error}</Message>

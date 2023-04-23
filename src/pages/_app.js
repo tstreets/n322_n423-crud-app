@@ -7,6 +7,7 @@ import { GlobalProvider } from '../useHooks/useGlobalValues';
 export default function App({ Component, pageProps }) {
 	const initialGlobalValues = {
 		booksList: [],
+		booksListLoadTime: 0,
 		error: '',
 	};
 	const [globalValues, setGlobalValues] = React.useState(initialGlobalValues);
@@ -16,6 +17,11 @@ export default function App({ Component, pageProps }) {
 	}
 
 	const firebase = useFirebase();
+
+	async function clearGlobalValues() {
+		await firebase.logoutUser();
+		setGlobalValues(initialGlobalValues);
+	}
 	return (
 		<>
 			<GlobalProvider value={{ ...globalValues, update: updateGlobalValues }}>
@@ -26,7 +32,7 @@ export default function App({ Component, pageProps }) {
 						</li>
 						<li>
 							{firebase.currentUser.email ? (
-								<button onClick={firebase.logoutUser}>Logout</button>
+								<button onClick={clearGlobalValues}>Logout</button>
 							) : (
 								<button onClick={firebase.loginUser}>Login</button>
 							)}
